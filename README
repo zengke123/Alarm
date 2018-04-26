@@ -1,0 +1,19 @@
+
+NEWSAP1
+处理原始数据，生成excel,邮件正文（HTML格式）
+input:history_alarm_YYYY-MM-DD.unl ywzbYYYY-MM-DD.unl maxcpuYYYY-MM-DD.unl
+main:
+main_tj.py 
+	alarm_tj.py # 告警分析
+	quato_tj.py # 指标分析
+		config.py  #网元类型与网元配置
+	TxtParse.py  #生成HTML模块
+	
+output:history_alarm_export_YYYY-MM-DD.xlsx report_alarm_YYYY-MM-DD.html
+       report_maxcpu_YYYY-MM-DD.html
+
+
+APIAGWWW01
+发送邮件
+alarm_mail.py  history_alarm_export_YYYY-MM-DD.xlsx report_alarm_YYYY-MM-DD.html
+tongji_mail.py report_maxcpu_YYYY-MM-DD.html
