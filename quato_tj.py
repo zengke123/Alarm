@@ -25,15 +25,16 @@ def get_max_cpu(df, col):
     # 获取最大CPU占用和最小内存剩余
     cpu = grouped.agg("max")["CPU"]
     mem = grouped.agg("min")["内存"]
+    io = grouped.agg("min")["IO"]
     cluster_types = df[col].drop_duplicates().values
-    cpu_data = [[col, "最大值项:CPU", "最大值项:MEM"]]
+    cpu_data = [[col, "最大值项:CPU", "最大值项:MEM","最大值项：IO"]]
     for cluster_type in cluster_types:
-        cpu_data.append([cluster_type, cpu[cluster_type], 100-mem[cluster_type]])
+        cpu_data.append([cluster_type, cpu[cluster_type], 100-mem[cluster_type],100-io[cluster_type]])
     return cpu_data
 
 # CPU&内存分析
 def cpu_analyse(cpu_file):
-    title = ['网元', '主机', 'CPU', '内存']
+    title = ['网元', '主机', 'CPU', '内存', 'IO']
     data = TxtParse(cpu_file, sep='|', titles=title)
     df = data.get_df()
     # 增加对应的网元类型
@@ -56,9 +57,9 @@ def cpu_analyse(cpu_file):
     list_b4ytd_grp = get_max_cpu(df_b4ytd, col="网元类型")
     list_wk_grp = get_max_cpu(df_wk, col="网元类型")
     # 转为DataFrame
-    df_ytd_grp = pd.DataFrame(list_ytd_grp[1:],columns=["网元类型","CPU","MEM"])
-    df_b4ytd_grp = pd.DataFrame(list_b4ytd_grp[1:],columns=["网元类型","CPU","MEM"])
-    df_wk_grp = pd.DataFrame(list_wk_grp[1:],columns=["网元类型","CPU","MEM"])
+    df_ytd_grp = pd.DataFrame(list_ytd_grp[1:],columns=["网元类型","CPU","MEM","IO"])
+    df_b4ytd_grp = pd.DataFrame(list_b4ytd_grp[1:],columns=["网元类型","CPU","MEM","IO"])
+    df_wk_grp = pd.DataFrame(list_wk_grp[1:],columns=["网元类型","CPU","MEM","IO"])
     # 昨天、前天、上周数据合并为一张表
     df_temp = pd.merge(df_b4ytd_grp,df_wk_grp,how="left",on="网元类型")
     df_merge = pd.merge(df_ytd_grp,df_temp,how="left",on="网元类型")
@@ -97,7 +98,7 @@ def quato_analyse(quato_file):
             line = line.split("|")
             clusters.append(line[0])
             values.append(line[1])
-    quato_name = ["2/3G 彩铃播放成功率", "2/3G V网呼叫成功率", "SCP忙时CAPS数"]
+    quato_name = ["2/3G 彩铃播放成功率", "2/3G V网呼叫成功率", "SCP忙时CAPS数", "二卡充值成功率"]
     quato_data = list(zip(quato_name, clusters, values))
     quato_data.insert(0, ["指标项","集群","指标"])
     quato_html = parseHtml(quato_data, title="关键业务指标")
