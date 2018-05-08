@@ -47,7 +47,7 @@ def main():
                        '群外呼入占用时长(秒)', '群外呼入接通时长(秒)', '群外呼入应答时长(秒)', '群外呼出占用时长(秒)',
                        '群外呼出接通时长(秒)', '群外呼出应答时长(秒)', '群内呼叫试呼处理次数(次)', '群外呼入试呼处理次数(次)',
                        '群外呼出试呼处理次数(次)', '用户原因拆线次数(次)', '用户原因拆线时间(秒)', '群内呼叫invite响应率(%)',
-                       '群外呼入invite响应率(%)', '群外呼出invite响应率(%)','网络接通率(%)']
+                       '群外呼入invite响应率(%)', '群外呼出invite响应率(%)','网络接通率(%)', 'none1', 'none2', 'none3']
         scpas_xlsx = "volte_vpmn_" + str(yesterday) + ".xlsx"
         format_excel(scpas_file, scpas_title, scpas_xlsx)
         logging.info("正在生成报表：" + scpas_xlsx)

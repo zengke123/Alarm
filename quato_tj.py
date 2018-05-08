@@ -29,7 +29,7 @@ def get_max_cpu(df, col):
     cluster_types = df[col].drop_duplicates().values
     cpu_data = [[col, "最大值项:CPU", "最大值项:MEM","最大值项：IO"]]
     for cluster_type in cluster_types:
-        cpu_data.append([cluster_type, cpu[cluster_type], 100-mem[cluster_type],100-io[cluster_type]])
+        cpu_data.append([cluster_type, cpu[cluster_type], round(100-mem[cluster_type],2),round(100-io[cluster_type],2)])
     return cpu_data
 
 # CPU&内存分析
@@ -103,3 +103,4 @@ def quato_analyse(quato_file):
     quato_data.insert(0, ["指标项","集群","指标"])
     quato_html = parseHtml(quato_data, title="关键业务指标")
     return quato_html
+
