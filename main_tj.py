@@ -6,9 +6,9 @@ import datetime
 import os
 import shutil
 import logging
+import db
 from TxtParse import TxtParse
-from quato_tj import cpu_analyse, quato_analyse
-from alarm_tj import alarm_analyse, alarm_compare
+from alarm_tj import alarm_analyse, alarm_compare_new, alarm_to_db
 
 def logger():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s',
@@ -40,50 +40,30 @@ if __name__ == "__main__":
         alarm.to_excel(alarm_xlsx)
         df = alarm.get_df()
         try:
-            t_start = '<table class="tableizer-table" cellspacing=0 width="90%";>\n'
-            today_alarm = alarm_analyse(df)
+            db.create_engine('root', '123456', 'tongji', '127.0.0.1')
+            alarm_to_db(db, df)
+        except Exception as e:
+            logging.error("告警入库失败")
+
+        try:
+            t_start = '<table class="tableizer-table" cellspacing=0 width="95%";>\n'
+            t_end = '</table>\n'
+            today_alarm, _ = alarm_analyse(df)
             logging.info("今日告警分析生成成功")
             if os.path.exists(file_yesterday):
-                alarm_old = TxtParse(file_yesterday, sep="|", titles=title)
-                df_old = alarm_old.get_df()
-                clear_alarm, same_alarm, add_alarm = alarm_compare(df, df_old)
-                today_alarm = today_alarm + clear_alarm + same_alarm + add_alarm
-                logging.info("告警同比分析生成成功")
+                try:
+                    alarm_old = TxtParse(file_yesterday, sep="|", titles=title)
+                    df_old = alarm_old.get_df()
+                    clear_alarm, same_alarm, add_alarm = alarm_compare_new(df, df_old)
+                    today_alarm = add_alarm + today_alarm + same_alarm + clear_alarm
+                    logging.info("告警同比分析生成成功")
+                except:
+                    pass
             # 生成告警分析HTML
-            t_end = '</table>\n'
             with open(alarm_report, "a") as f:
                 f.write(t_start + today_alarm + t_end)
+            os.system("sh up2.sh > /dev/null")
         except:
             logging.error("生成告警分析文件失败")
     else:
         logging.error("历史告警文件缺失")
-
-    # 业务指标统计
-    cpu_file = "maxcpu" + str(today) + ".unl"
-    quato_file = "ywzb" + str(today) + ".unl"
-    quato_report = "report_maxcpu_" + str(datetime.date.today()) + ".html"
-    if os.path.exists(quato_report):
-        os.remove(quato_report)
-    shutil.copy("alarm.html", quato_report)
-    if os.path.exists(cpu_file) and os.path.exists(quato_file):
-        try:
-            t_start = '<table class="tableizer-table" cellspacing=0 width="60%";>\n'
-            t_end = '</table>\n'
-            zyjh_html, cpu_html = cpu_analyse(cpu_file)
-            quato_html = quato_analyse(quato_file)
-            html = t_start + quato_html + t_end + "<br></br>" + t_start + cpu_html + t_end + "<br></br>" + t_start + zyjh_html + t_end
-            with open(quato_report, "a") as f:
-                f.write(html)
-            logging.info("业务指标统计生成成功")
-        except :
-            logging.error("业务指标统计生成失败")
-    else:
-        logging.error("业务指标原始文件缺失")
-
-
-
-
-
-
-
-
